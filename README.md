@@ -97,6 +97,8 @@ DB_PATH=/app/data/budget_tracker.db
 -v ./data:/app/data
 ```
 
+**Hinweis**: Das `/app/data` Verzeichnis wird automatisch erstellt, wenn es nicht existiert. Die Datenbankdatei `budget_tracker.db` wird beim ersten Start des Servers erstellt.
+
 #### Vollständiges Docker Run Beispiel
 
 ```bash
@@ -203,6 +205,54 @@ budget-tracker/
 - React Hooks Best Practices
 - Responsive Design
 - Dark Mode Support
+
+## Troubleshooting
+
+### Datenbank wird nicht erstellt
+
+**Problem**: Die Datenbankdatei wird nicht im gemappten Volume erstellt.
+
+**Lösung**:
+1. Stelle sicher, dass das Volume korrekt gemappt ist: `-v ./data:/app/data`
+2. Überprüfe die Container-Logs: `docker logs <container-name>`
+3. Das `/app/data` Verzeichnis wird automatisch erstellt
+4. Die Datenbankdatei wird beim ersten Server-Start erstellt
+
+**Debugging**:
+```bash
+# Container-Logs anzeigen
+docker logs budget-tracker
+
+# In den Container einsteigen
+docker exec -it budget-tracker sh
+
+# Datenbankverzeichnis überprüfen
+ls -la /app/data/
+```
+
+### Port-Konflikte
+
+**Problem**: Port 3000 ist bereits belegt.
+
+**Lösung**:
+```bash
+# Anderen Port verwenden
+docker run -p 3001:3000 -e PORT=3000 ...
+```
+
+### Volume-Berechtigungen
+
+**Problem**: Container kann nicht auf das Volume schreiben.
+
+**Lösung**:
+```bash
+# Berechtigungen setzen
+chmod 755 ./data
+
+# Oder mit Docker Compose
+volumes:
+  - ./data:/app/data:Z  # SELinux Label
+```
 
 ## Lizenz
 

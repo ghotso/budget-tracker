@@ -18,8 +18,15 @@ COPY . .
 # Build client
 RUN cd client && npm run build
 
+# Create data directory
+RUN mkdir -p /app/data
+
+# Copy and make init script executable
+COPY init-db.sh /app/
+RUN chmod +x /app/init-db.sh
+
 # Expose port
 EXPOSE 3000
 
 # Start the application
-CMD ["npm", "start"]
+CMD ["sh", "-c", "/app/init-db.sh && npm start"]
