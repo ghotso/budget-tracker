@@ -14,7 +14,13 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, '../client/build')));
 
 // SQLite Database Setup
-const dbPath = process.env.NODE_ENV === 'production' ? '/app/data/budget_tracker.db' : './budget_tracker.db';
+const dbPath = process.env.NODE_ENV === 'production' || process.env.DB_PATH ? 
+  (process.env.DB_PATH || '/app/data/budget_tracker.db') : 
+  './budget_tracker.db';
+
+console.log(`NODE_ENV: ${process.env.NODE_ENV}`);
+console.log(`DB_PATH: ${process.env.DB_PATH}`);
+console.log(`Database path: ${dbPath}`);
 
 // Ensure database directory exists
 const dbDir = path.dirname(dbPath);

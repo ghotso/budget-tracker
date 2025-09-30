@@ -82,6 +82,7 @@ Der Docker Container benötigt folgende Umgebungsvariablen:
 PORT=3000
 
 # Datenbankpfad (Standard: /app/data/budget_tracker.db)
+# Wird automatisch auf /app/data/budget_tracker.db gesetzt wenn nicht angegeben
 DB_PATH=/app/data/budget_tracker.db
 ```
 
