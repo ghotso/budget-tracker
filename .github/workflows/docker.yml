@@ -62,16 +62,3 @@ jobs:
         subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
         subject-digest: ${{ steps.build.outputs.digest }}
         push: true
-
-    - name: Sign the published Docker image
-      uses: sigstore/cosign-installer@v3
-      if: github.event_name != 'pull_request'
-
-    - name: Sign container image
-      uses: sigstore/cosign-action@v2
-      if: github.event_name != 'pull_request'
-      with:
-        image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.build.outputs.digest }}
-        private-key: ${{ secrets.COSIGN_PRIVATE_KEY }}
-        certificate-identity: ${{ secrets.COSIGN_CERTIFICATE_IDENTITY }}
-        certificate-oidc-issuer: https://token.actions.githubusercontent.com

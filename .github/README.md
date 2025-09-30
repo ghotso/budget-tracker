@@ -30,7 +30,7 @@ Das Repository benötigt ein Secret namens `GHCR_TOKEN`:
   - Pusht zu GHCR mit automatischen Tags
   - Multi-Architecture Support
   - Build Cache für bessere Performance
-  - Container Signing (optional)
+  - Artifact Attestation für Sicherheit
 
 ### 2. release.yml
 - **Trigger**: Nur bei veröffentlichten Releases
