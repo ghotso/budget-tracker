@@ -1,6 +1,8 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const CustomerList = ({ customers, onCustomerSelect, onEditCustomer, onDeleteCustomer }) => {
+  const navigate = useNavigate();
   const handleDelete = async (customerId, customerName) => {
     if (window.confirm(`Möchten Sie den Kunden "${customerName}" wirklich löschen?`)) {
       try {
@@ -32,7 +34,7 @@ const CustomerList = ({ customers, onCustomerSelect, onEditCustomer, onDeleteCus
           <div style={{ marginTop: '15px' }}>
             <button 
               className="btn"
-              onClick={() => onCustomerSelect(customer)}
+              onClick={() => navigate(`/customers/${customer.id}`)}
             >
               Details anzeigen
             </button>

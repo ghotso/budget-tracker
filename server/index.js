@@ -268,6 +268,96 @@ app.put('/api/time-entries/:id/finish', (req, res) => {
   });
 });
 
+// Get all running and paused stopwatches across all customers
+app.get('/api/running-stopwatches', (req, res) => {
+  db.all(`
+    SELECT te.*, c.name as customer_name, c.hourly_rate 
+    FROM time_entries te 
+    JOIN customers c ON te.customer_id = c.id 
+    WHERE te.is_running = 1 OR (te.is_running = 0 AND te.end_time IS NULL)
+    ORDER BY te.start_time ASC
+  `, (err, rows) => {
+    if (err) {
+      res.status(500).json({ error: err.message });
+      return;
+    }
+    res.json(rows);
+  });
+});
+
+// Update time entry description
+app.put('/api/time-entries/:id', (req, res) => {
+  const { id } = req.params;
+  const { description, start_time, end_time, duration_seconds } = req.body;
+  
+  // If it's a finished entry, allow full update
+  if (start_time && end_time && duration_seconds !== undefined) {
+    db.run(
+      'UPDATE time_entries SET description = ?, start_time = ?, end_time = ?, duration_seconds = ? WHERE id = ?',
+      [description, start_time, end_time, duration_seconds, id],
+      function(err) {
+        if (err) {
+          res.status(500).json({ error: err.message });
+          return;
+        }
+        res.json({ message: 'Time entry updated successfully' });
+      }
+    );
+  } else {
+    // Only update description for running/paused entries
+    db.run(
+      'UPDATE time_entries SET description = ? WHERE id = ?',
+      [description, id],
+      function(err) {
+        if (err) {
+          res.status(500).json({ error: err.message });
+          return;
+        }
+        res.json({ message: 'Time entry updated successfully' });
+      }
+    );
+  }
+});
+
+// Delete time entry
+app.delete('/api/time-entries/:id', (req, res) => {
+  const { id } = req.params;
+  
+  db.run('DELETE FROM time_entries WHERE id = ?', [id], function(err) {
+    if (err) {
+      res.status(500).json({ error: err.message });
+      return;
+    }
+    res.json({ message: 'Time entry deleted successfully' });
+  });
+});
+
+// Create manual time entry
+app.post('/api/customers/:id/manual-time-entry', (req, res) => {
+  const { id } = req.params;
+  const { description, start_time, end_time, duration_seconds } = req.body;
+  
+  db.run(
+    'INSERT INTO time_entries (customer_id, description, start_time, end_time, duration_seconds, is_running) VALUES (?, ?, ?, ?, ?, 0)',
+    [id, description, start_time, end_time, duration_seconds],
+    function(err) {
+      if (err) {
+        res.status(500).json({ error: err.message });
+        return;
+      }
+      res.json({ 
+        id: this.lastID, 
+        customer_id: id, 
+        description, 
+        start_time, 
+        end_time,
+        duration_seconds,
+        is_running: 0
+      });
+    }
+  );
+});
+
 // Customer overview with budget calculation
 app.get('/api/customers/:id/overview', (req, res) => {
   const { id } = req.params;

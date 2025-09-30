@@ -1,44 +1,209 @@
 # Budget Tracker
 
-Eine Webapp für Kundenverwaltung und Budget-Tracking mit Zeitbuchungen.
+Eine einfache Web-Anwendung zur Verwaltung von Kundenbudgets und Zeiterfassung.
 
 ## Features
 
-- Kundenverwaltung (CRUD)
-- Budget-Management mit Kommentaren
-- Stopwatch-Funktionalität pro Kunde
-- Automatische Kostenberechnung (Zeit × Stundensatz)
-- Budget-Übersicht mit verbleibendem Budget
-- Mobile-optimiertes Design
-- SQLite Datenbank
-
-## Installation
-
-### Mit Docker (empfohlen)
-
-```bash
-# Container bauen
-npm run docker:build
-
-# Container starten
-npm run docker:run
-```
-
-### Lokale Entwicklung
-
-```bash
-# Dependencies installieren
-npm install
-
-# Entwicklungsserver starten
-npm run dev
-```
-
-Die App ist dann unter `http://localhost:3000` erreichbar.
+- Kundenverwaltung (erstellen, bearbeiten, löschen)
+- Budget-Management mit Kommentaren und Historie
+- Stundensatz-Verwaltung pro Kunde
+- Stopwatch-Funktionalität mit Pausierung und Echtzeit-Anzeige
+- Zeitbuchungen mit Beschreibungen (manuell und automatisch)
+- Vollständige CRUD-Operationen für Zeitbuchungen
+- Budget-Übersicht mit verbleibendem Budget und Stunden
+- Dashboard mit allen aktiven/pausierten Stopwatches
+- Dark Mode
+- Mobile-optimiert
+- SQLite-Datenbank
+- React Router für persistente Navigation
 
 ## Technologie-Stack
 
-- **Frontend**: React, CSS3
-- **Backend**: Node.js, Express
+- **Frontend**: React mit React Router
+- **Backend**: Node.js/Express
 - **Datenbank**: SQLite
-- **Container**: Docker
+- **Container**: Docker & Docker Compose
+- **CI/CD**: GitHub Actions mit GHCR
+
+## Lokale Entwicklung
+
+### Voraussetzungen
+
+- Node.js (v14 oder höher)
+- npm
+
+### Installation
+
+1. Repository klonen:
+```bash
+git clone <repository-url>
+cd budget-tracker
+```
+
+2. Abhängigkeiten installieren:
+```bash
+# Backend
+cd server
+npm install
+
+# Frontend
+cd ../client
+npm install
+```
+
+3. Entwicklungsserver starten:
+```bash
+# Im Hauptverzeichnis
+./start-dev.sh
+```
+
+Die Anwendung ist dann verfügbar unter:
+- Frontend: http://localhost:3001
+- Backend: http://localhost:3000
+
+## Docker
+
+### Docker Compose (Empfohlen)
+
+Das Projekt kann mit Docker Compose ausgeführt werden:
+
+```bash
+docker-compose up
+```
+
+### Docker Container
+
+#### Umgebungsvariablen
+
+Der Docker Container benötigt folgende Umgebungsvariablen:
+
+```bash
+# Port für den Server (Standard: 3000)
+PORT=3000
+
+# Datenbankpfad (Standard: /app/data/budget_tracker.db)
+DB_PATH=/app/data/budget_tracker.db
+```
+
+#### Volume Mapping
+
+**Wichtig**: Das Datenbankverzeichnis muss gemappt werden, um Datenpersistenz zu gewährleisten:
+
+```bash
+# Datenbankverzeichnis mappen
+-v /host/path/to/data:/app/data
+
+# Beispiel:
+-v ./data:/app/data
+```
+
+#### Vollständiges Docker Run Beispiel
+
+```bash
+docker run -d \
+  --name budget-tracker \
+  -p 3000:3000 \
+  -e PORT=3000 \
+  -e DB_PATH=/app/data/budget_tracker.db \
+  -v ./data:/app/data \
+  ghcr.io/your-username/budget-tracker:latest
+```
+
+#### Docker Compose Beispiel
+
+```yaml
+version: '3.8'
+services:
+  budget-tracker:
+    image: ghcr.io/your-username/budget-tracker:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - DB_PATH=/app/data/budget_tracker.db
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
+```
+
+### Datenbank
+
+- **Typ**: SQLite
+- **Speicherort**: `/app/data/budget_tracker.db` (im Container)
+- **Persistenz**: Über Volume Mapping sicherstellen
+- **Backup**: Regelmäßige Backups des `data`-Verzeichnisses empfohlen
+
+## GitHub Container Registry (GHCR)
+
+Das Projekt wird automatisch auf GHCR veröffentlicht:
+
+### Container abrufen
+
+```bash
+# Container von GHCR pullen
+docker pull ghcr.io/your-username/budget-tracker:latest
+
+# Mit Docker Compose
+docker-compose pull
+```
+
+### Tags
+
+- `latest`: Neueste Version
+- `v1.0.0`: Versionierte Releases
+- `main`: Aktueller Main Branch
+
+## API Endpunkte
+
+### Kunden
+- `GET /api/customers` - Alle Kunden abrufen
+- `POST /api/customers` - Neuen Kunden erstellen
+- `PUT /api/customers/:id` - Kunden aktualisieren
+- `DELETE /api/customers/:id` - Kunden löschen
+
+### Zeitbuchungen
+- `GET /api/customers/:id/time-entries` - Zeitbuchungen eines Kunden
+- `POST /api/customers/:id/time-entries` - Neue Zeitbuchung erstellen
+- `PUT /api/time-entries/:id` - Zeitbuchung aktualisieren
+- `DELETE /api/time-entries/:id` - Zeitbuchung löschen
+- `PUT /api/time-entries/:id/pause` - Timer pausieren
+- `PUT /api/time-entries/:id/resume` - Timer fortsetzen
+- `PUT /api/time-entries/:id/finish` - Timer beenden
+
+### Budget
+- `GET /api/customers/:id/budget-changes` - Budget-Historie
+- `POST /api/customers/:id/budget-changes` - Budget-Änderung
+
+### Dashboard
+- `GET /api/running-stopwatches` - Alle aktiven/pausierten Stopwatches
+
+## Entwicklung
+
+### Projektstruktur
+
+```
+budget-tracker/
+├── client/                 # React Frontend
+│   ├── src/
+│   │   ├── components/    # React Komponenten
+│   │   ├── contexts/       # React Contexts
+│   │   └── ...
+│   └── package.json
+├── server/                 # Node.js Backend
+│   ├── index.js           # Express Server
+│   └── package.json
+├── docker-compose.yml     # Docker Compose Konfiguration
+├── Dockerfile            # Docker Image Definition
+└── README.md
+```
+
+### Code-Qualität
+
+- ESLint für Code-Linting
+- React Hooks Best Practices
+- Responsive Design
+- Dark Mode Support
+
+## Lizenz
+
+MIT License

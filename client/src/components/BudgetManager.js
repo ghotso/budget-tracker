@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 const BudgetManager = ({ customerId, onBudgetChangeCreated }) => {
   const [budgetChanges, setBudgetChanges] = useState([]);
@@ -8,6 +8,20 @@ const BudgetManager = ({ customerId, onBudgetChangeCreated }) => {
     comment: '',
     change_type: 'increase'
   });
+
+  const fetchBudgetChanges = useCallback(async () => {
+    try {
+      const response = await fetch(`/api/customers/${customerId}/budget-changes`);
+      const data = await response.json();
+      setBudgetChanges(data);
+    } catch (error) {
+      console.error('Error fetching budget changes:', error);
+    }
+  }, [customerId]);
+
+  useEffect(() => {
+    fetchBudgetChanges();
+  }, [fetchBudgetChanges]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -35,10 +49,9 @@ const BudgetManager = ({ customerId, onBudgetChangeCreated }) => {
       });
 
       if (response.ok) {
-        const data = await response.json();
-        setBudgetChanges([data, ...budgetChanges]);
         setFormData({ amount: 0, comment: '', change_type: 'increase' });
         setShowForm(false);
+        fetchBudgetChanges(); // Reload budget changes
         onBudgetChangeCreated();
       } else {
         alert('Fehler beim Speichern der Budgetänderung');

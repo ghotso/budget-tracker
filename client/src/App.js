@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import CustomerList from './components/CustomerList';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import CustomerForm from './components/CustomerForm';
 import CustomerDetail from './components/CustomerDetail';
+import CustomersPage from './components/CustomersPage';
+import DashboardPage from './components/DashboardPage';
 
-function App() {
+function AppContent() {
+  const { isDarkMode, toggleTheme } = useTheme();
   const [customers, setCustomers] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [showCustomerForm, setShowCustomerForm] = useState(false);
@@ -50,62 +54,93 @@ function App() {
     setShowCustomerForm(true);
   };
 
-  const handleBackToList = () => {
-    setSelectedCustomer(null);
-  };
-
   return (
-    <div className="App">
-      <div className="header">
+    <Router>
+      <div className="App">
+        <div className="header">
+          <div className="container">
+            <h1>Budget Tracker</h1>
+            <nav style={{ marginTop: '10px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <Link 
+                to="/"
+                className="btn"
+              >
+                Dashboard
+              </Link>
+              <Link 
+                to="/customers"
+                className="btn"
+              >
+                Kunden
+              </Link>
+              <button 
+                className="btn"
+                onClick={toggleTheme}
+                style={{ marginLeft: 'auto' }}
+                title={isDarkMode ? 'Zu hellem Modus wechseln' : 'Zu dunklem Modus wechseln'}
+              >
+                {isDarkMode ? '☀️' : '🌙'}
+              </button>
+            </nav>
+          </div>
+        </div>
+
         <div className="container">
-          <h1>Budget Tracker</h1>
+          <Routes>
+            <Route 
+              path="/" 
+              element={
+                <DashboardPage 
+                  customers={customers}
+                  onCustomerSelect={handleCustomerSelect}
+                />
+              } 
+            />
+            <Route 
+              path="/customers" 
+              element={
+                <CustomersPage
+                  customers={customers}
+                  onCustomerSelect={handleCustomerSelect}
+                  onEditCustomer={handleEditCustomer}
+                  onDeleteCustomer={handleCustomerDeleted}
+                  onShowCustomerForm={() => setShowCustomerForm(true)}
+                />
+              } 
+            />
+            <Route 
+              path="/customers/:id" 
+              element={
+                <CustomerDetail
+                  onCustomerUpdated={handleCustomerUpdated}
+                  onCustomerDeleted={handleCustomerDeleted}
+                />
+              } 
+            />
+          </Routes>
+
+          {showCustomerForm && (
+            <CustomerForm
+              customer={editingCustomer}
+              onCustomerCreated={handleCustomerCreated}
+              onCustomerUpdated={handleCustomerUpdated}
+              onCancel={() => {
+                setShowCustomerForm(false);
+                setEditingCustomer(null);
+              }}
+            />
+          )}
         </div>
       </div>
+    </Router>
+  );
+}
 
-      <div className="container">
-        {selectedCustomer ? (
-          <CustomerDetail
-            customer={selectedCustomer}
-            onBack={handleBackToList}
-            onCustomerUpdated={handleCustomerUpdated}
-            onCustomerDeleted={handleCustomerDeleted}
-          />
-        ) : (
-          <>
-            <div className="card">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h2>Kunden</h2>
-                <button 
-                  className="btn btn-success"
-                  onClick={() => setShowCustomerForm(true)}
-                >
-                  Neuer Kunde
-                </button>
-              </div>
-            </div>
-
-            <CustomerList
-              customers={customers}
-              onCustomerSelect={handleCustomerSelect}
-              onEditCustomer={handleEditCustomer}
-              onDeleteCustomer={handleCustomerDeleted}
-            />
-          </>
-        )}
-
-        {showCustomerForm && (
-          <CustomerForm
-            customer={editingCustomer}
-            onCustomerCreated={handleCustomerCreated}
-            onCustomerUpdated={handleCustomerUpdated}
-            onCancel={() => {
-              setShowCustomerForm(false);
-              setEditingCustomer(null);
-            }}
-          />
-        )}
-      </div>
-    </div>
+function App() {
+  return (
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
   );
 }
 

@@ -19,6 +19,11 @@ const CustomerOverview = ({ overview }) => {
     return overview.timeEntries.reduce((total, entry) => total + entry.duration_seconds, 0) / 3600;
   };
 
+  const getRemainingHours = () => {
+    if (overview.customer.hourly_rate <= 0) return 0;
+    return overview.remainingBudget / overview.customer.hourly_rate;
+  };
+
   return (
     <div className="budget-overview">
       <h3>Budget-Übersicht für {overview.customer.name}</h3>
@@ -45,11 +50,19 @@ const CustomerOverview = ({ overview }) => {
           </h3>
           <p>Verbleibendes Budget</p>
         </div>
+        
+        <div className="budget-stat">
+          <h3 style={{ color: getRemainingHours() >= 0 ? '#27ae60' : '#e74c3c' }}>
+            {getRemainingHours().toFixed(1)}h
+          </h3>
+          <p>Verbleibende Stunden</p>
+        </div>
       </div>
 
       <div style={{ marginTop: '20px' }}>
         <p><strong>Stundensatz:</strong> {formatCurrency(overview.customer.hourly_rate)}/h</p>
         <p><strong>Gebuchte Stunden:</strong> {getTotalHours().toFixed(2)}h</p>
+        <p><strong>Verbleibende Stunden:</strong> {getRemainingHours().toFixed(1)}h</p>
         <p><strong>Durchschnittliche Kosten pro Stunde:</strong> {formatCurrency(overview.totalTimeCosts / Math.max(getTotalHours(), 1))}</p>
       </div>
     </div>
