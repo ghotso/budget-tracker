@@ -1,0 +1,21 @@
+{
+  "name": "budget-tracker",
+  "version": "1.0.0",
+  "description": "Budget Tracker Webapp für Kundenverwaltung und Zeitbuchungen",
+  "main": "server/index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd server && npm run dev",
+    "client": "cd client && npm start",
+    "build": "cd client && npm run build",
+    "start": "cd server && npm start",
+    "docker:build": "docker build -t budget-tracker .",
+    "docker:run": "docker run -p 3000:3000 budget-tracker"
+  },
+  "keywords": ["budget", "tracker", "react", "nodejs", "sqlite"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
